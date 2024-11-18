@@ -5,6 +5,7 @@
 	border:		.asciiz		"-------------------------"
 	totalTime:	.asciiz		"\nTotal time: "
 	nextLine:	.asciiz		"\n"
+	nums:			.word 	1, 2, 3, 4, 5	#choice of numbers for easy mode
 
 .text
 
@@ -82,19 +83,7 @@ rand_vals:
     	sw	$t1, solutions($s1)
     	addi	$s1, $s1, 4
     	bne 	$s1, $s2, rand_vals	#keep making equation-solution pairs 
-    	#li 	$a1, 16 	#upper bound 16, 0-15 to get random index of where to store equation
-    	#li 	$v0, 42
-    	#syscall
-    	#add 	$s1, $zero, $a0
-    	#sll	$s1, $s1, 2
-    	#sw	$t5, board($s1) #store equation in board
     	
-    	#li 	$a1, 16 	
-    	#li 	$v0, 42
-    	#syscall
-    	#add 	$s1, $zero, $a0
-    	#sll	$s1, $s1, 2
-    	#sw	$t6, board($s1) #store solution in board
 	
 	jr	$ra
 
