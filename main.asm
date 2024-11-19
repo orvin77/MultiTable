@@ -20,6 +20,11 @@ not_a_match:		.asciiz	"No match found. Keep trying!\n"
 msg_match:		.asciiz	"You found a match. Keep it up!\n"
 matched_crd:		.asciiz	"  =  |"
 alr_matched:		.asciiz	"Atleast 1 of these cards have already been matched. Try again.\n"
+end:			.asciiz	"\nCongratulations! You matched all the cards! Good Job!\n"
+elaps_time:		.asciiz	"Time elapsed: "
+mili:			.asciiz " milliseconds.\n"
+startTime:		.word	0
+endTime:		.word 	0
 
 #t6, t3, t9, t7, t8, t5
 #t3, t5, t6, t7, t8, t9
@@ -29,6 +34,11 @@ alr_matched:		.asciiz	"Atleast 1 of these cards have already been matched. Try a
 .globl main, board, equations, solutions, offsets, indicator, choice_one, choice_two, stored_indicies, user_sols, user_eqs, card_count, matched_crd, check_match, game_loop
 
 main:
+	# Read start time
+   	li 	$v0, 30     #System call to get current time
+   	syscall
+   	sw 	$a0, startTime  #Store start time
+   	
 	jal 	rand_vals		#initialize random equations and corresponding solutions
 	addi	$t0, $zero, 0		#set $t1 back to 0
 	addi	$t1, $zero, 0		#set $t1 back to 0
@@ -46,6 +56,7 @@ init_board:
     	j     	init_board
 init_end:
 	li	$s0, 0
+
 	jal 	printCards
 game_loop:
     	# Prompt for row
@@ -230,6 +241,13 @@ found_match:
 	#beq	$t0, 17, already_matched
 	#beq	$t1, 17, already_matched
 	
+	#play sound to indicate they got the match
+	li      $v0, 31
+    	li      $a0, 84       # Higher pitch for success
+    	li      $a1, 300      # Longer duration
+    	li      $a2, 9        # Glockenspiel
+    	li      $a3, 127      # Full volume
+    	syscall
 
 	#print found match message
 	li	$v0, 4
@@ -238,7 +256,9 @@ found_match:
 	la	$a0, nextLine
 	syscall
 	
+	
 	#print remaining cards count
+	li	$v0, 4
 	la	$a0, remaining
 	syscall
 	la	$a1, card_count
@@ -247,7 +267,7 @@ found_match:
 	sw	$a0, 0($a1)
 	li	$v0, 1
 	syscall
-	
+	ble	$a0, 0, end_game
 	#print new line
 	li	$v0, 4
 	la	$a0, nextLine
@@ -286,6 +306,12 @@ no_match:
 	#compare value to 17(value for match found)
 	#beq	$t0, 17, already_matched
 	#beq	$t1, 17, already_matched
+	li      $v0, 31
+    	li      $a0, 60       # Lower pitch for failure
+    	li      $a1, 200      # Medium duration
+    	li      $a2, 9        # Glockenspiel
+    	li      $a3, 100      # Medium volume
+    	syscall
 	
 	#print no match message
 	li	$v0, 4
@@ -340,6 +366,32 @@ reset:
 	
 	jal	printCards
  	
-
+end_game:
+	li	$v0, 4
+	la	$a0, end
+	syscall
+	# Read end time
+    	li 	$v0, 30
+    	syscall
+   	sw 	$a0, endTime
+   	
+   	li 	$v0, 4
+   	la	$a0, elaps_time
+   	syscall
+   	
+   	
+   	lw	$t0, startTime
+   	lw	$t1, endTime
+   	sub 	$a0, $t1, $t0
+   	li	$v0, 1
+   	syscall
+   	
+   	li	$v0, 4
+   	la	$a0, mili
+   	syscall
+   	
+	
+	li	$v0, 10
+	syscall
 	
 	
